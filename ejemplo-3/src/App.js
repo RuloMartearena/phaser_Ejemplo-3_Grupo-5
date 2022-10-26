@@ -11,8 +11,11 @@ function App() {
   useEffect(() => {
     const config = {
       type: Phaser.AUTO,
-      width: 800,
-      height: 600,
+      scale: {
+        autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
+        width: 800,
+        height: 600
+      },
       physics: {
         default: 'arcade',
         arcade: {
