@@ -13,7 +13,7 @@ class Levels extends Phaser.Scene {
 
         var block = this.relatedScene.physics.add.staticGroup({
             key: this.keys,
-            frameQuantity: 10, // cantidad de ladrillos
+            frameQuantity: 5, // cantidad de ladrillos
             gridAlign: {
                 width: 10, // ancho de la malla
                 height: 6, // alto de la malla
@@ -29,14 +29,18 @@ class Levels extends Phaser.Scene {
 
     CreateLevelTwo() {
 
-        var block = this.relatedScene.physics.add.staticGroup();
-        var ind = 1;
-        for (var i = 0; i < 8; i++) {
-            for (var j = 0; j < ind; j++) {
-                var bloq = block.create(40 + j * 100, 50 + i * 30, this.keys[Phaser.Math.Between(0, 4)]);
+        var block = this.relatedScene.physics.add.staticGroup({
+            key: this.keys,
+            frameQuantity: 10, // cantidad de ladrillos
+            gridAlign: {
+                width: 10, // ancho de la malla
+                height: 6, // alto de la malla
+                cellWidth: 70, // ancho en px de la malla
+                cellHeight: 40, // alto en px de la malla
+                x: 100, // posicion en x de la malla
+                y: 100 // posicion en y de la malla
             }
-            ind++;
-        }
+        });
 
         return block
 

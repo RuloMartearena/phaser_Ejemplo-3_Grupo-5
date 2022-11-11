@@ -9,6 +9,7 @@ class Escena extends Phaser.Scene {
     }
 
     // Se establecen para que no tiren error por las dudas
+    score = null;
     cursors = null;
     paleta = null;
     pelota = null;
@@ -18,7 +19,11 @@ class Escena extends Phaser.Scene {
     ladrillosTres = null;
     ladrillosCuatro = null;
     ladrillosCinco = null;
-    // brickImpactSample = null;
+    currentLevel = null;
+    brickImpactSample = null;
+    platformImpactSample = null;
+    victorySample = null;
+    derrotaSample = null;
 
     // Esta funcion se va a ejecutar cuando la escena se cargue por primera vez y cada vez que se refresque la escena
     init() {
@@ -28,7 +33,7 @@ class Escena extends Phaser.Scene {
     // Contiene las precargas de los archivos necesarios para la escena actual
     preload() {
 
-        // Carga una imagen. Los parametros son el nombre y la direccion
+        // Carga una imagen. Los parametros son (nombre, direccion)
         this.load.image('fondo', 'img/arkanoid/fondo.png');
         this.load.image('pelota', 'img/arkanoid/ball.png');
         this.load.image('ladrillo0', 'img/arkanoid/brick0.png');
@@ -40,7 +45,10 @@ class Escena extends Phaser.Scene {
         this.load.image('paleta', 'img/arkanoid/paddle.png');
 
         // Carga sonidos
-        // this.load.audio('brickImpact', 'sonidos/arkanoid/romper.mp3');
+        this.load.audio('brickImpact', 'sonidos/arkanoid/romper.mp3');
+        this.load.audio('platformImpact', 'sonidos/arkanoid/colision.mp3');
+        this.load.audio('victory', 'sonidos/arkanoid/victory.mp3');
+        this.load.audio('derrota', 'sonidos/arkanoid/derrota.mp3');
 
     }
 
@@ -50,8 +58,17 @@ class Escena extends Phaser.Scene {
         // Mundo
         this.physics.world.setBoundsCollision(true, true, true, false); // hace que los bordes gestionen colisiones
 
+        // Niveles
+        this.levels = new Levels(this);
+
         // Fondo
         this.add.image(400, 300, 'fondo');
+
+        // Sonido
+        this.brickImpactSample = this.sound.add('brickImpact');
+        this.platformImpactSample = this.sound.add('platformImpact');
+        this.victorySample = this.sound.add('victory');
+        this.derrotaSample = this.sound.add('derrota');
 
         // Score
         this.scoreText = this.add.text(10, 570, 'Puntos: 0', {
@@ -77,18 +94,10 @@ class Escena extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         // Ladrillos
-        this.ladrillos = this.physics.add.staticGroup({
-            key: ['ladrillo0', 'ladrillo1', 'ladrillo2', 'ladrillo3', 'ladrillo4', 'ladrillo5'],
-            frameQuantity: 10, // cantidad de ladrillos
-            gridAlign: {
-                width: 10, // ancho de la malla
-                height: 6, // alto de la malla
-                cellWidth: 70, // ancho en px de la malla
-                cellHeight: 40, // alto en px de la malla
-                x: 100, // posicion en x de la malla
-                y: 100 // posicion en y de la malla
-            }
-        });
+        this.ladrillos = this.levels.CreateLevelOne();
+
+        // Nivel
+        this.currentLevel = 1;
 
         // Colisiones
         this.physics.add.collider(this.pelota, this.paleta, this.platformImpact.bind(this), null);
@@ -127,16 +136,42 @@ class Escena extends Phaser.Scene {
 
         if (this.cursors.space.isDown) {
             if (this.pelota.getData('glue')) {
-                this.pelota.setVelocity(-200, -200);
+                this.pelota.setVelocity(-200, -200); // cambia la velocidad en x e y de la ball
                 this.pelota.setData('glue', false);
+            }
+        }
+
+        if (this.ladrillos.countActive() === 0) {
+            this.currentLevel++;
+            switch (this.currentLevel) {
+                case 2:
+                    this.ladrillos = this.levels.CreateLevelTwo(); // crea el lvl 2
+                    this.physics.add.collider(this.pelota, this.ladrillos, this.ladrillosImpact, null, this);
+                    this.resetBallposition(); // reestablece la posicion de la ball
+                    break;
+                case 3:
+                    this.showCongratulations(); // escena de victoria
+                    break;
+                default: // caso por defecto
+                    break;
             }
         }
 
     }
 
-    // Impacto del jugador con la pelota y más
+    // Impacto de la pelota con los ladrillos
+    ladrillosImpact(pelota, ladrillo) {
+        this.brickImpactSample.play();
+        ladrillo.disableBody(true, true);
+        this.score++;
+        this.scoreText.setText('Puntos: ' + this.score);
+
+    }
+
+    // Impacto del jugador con la pelota
     platformImpact(pelota, paleta) {
 
+        this.platformImpactSample.play();
         let relativeImpact = pelota.x - paleta.x;
 
         if (relativeImpact < 0.1 && relativeImpact > -0.1) {
@@ -147,23 +182,11 @@ class Escena extends Phaser.Scene {
 
     }
 
-    // Impacto de la pelota con los ladrillos
-    ladrillosImpact(pelota, ladrillo) {
-
-        ladrillo.disableBody(true, true);
-        this.score++;
-        this.scoreText.setText('Puntos: ' + this.score);
-        if (this.ladrillos.countActive() === 0) {
-            this.showCongratulations();
-        }
-
-    }
-
     // Resetea la posicion de la pelota
     resetBallposition() {
 
         this.pelota.setData('glue', true);
-        this.pelota.x = 400;
+        this.pelota.x = this.paleta.x;
         this.pelota.y = 485;
         this.pelota.setVelocityY(0);
 
@@ -171,11 +194,13 @@ class Escena extends Phaser.Scene {
 
     // Escena de Game Over
     showGameOver() {
+        this.derrotaSample.play();
         this.scene.start('gameover');
     }
 
-    // Escena de Game Over
+    // Escena de Congratulations
     showCongratulations() {
+        this.victorySample.play();
         this.scene.start('congratulations');
     }
 
