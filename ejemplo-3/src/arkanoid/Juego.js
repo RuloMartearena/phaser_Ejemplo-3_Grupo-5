@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Escena from './scenes/Escena';
 import GameOver from './scenes/GameOver';
 import Congratulations from './scenes/Congratulations';
+import Preview from './scenes/Preview';
 
 function App() {
 
@@ -20,7 +21,7 @@ function App() {
       physics: {
         default: 'arcade',
       },
-      scene: [Escena, GameOver, Congratulations]
+      scene: [Preview, Escena, GameOver, Congratulations]
     };
 
     // Arranca el juego 

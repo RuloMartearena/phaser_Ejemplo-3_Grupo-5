@@ -27,7 +27,7 @@ class Escena extends Phaser.Scene {
 
     // Esta funcion se va a ejecutar cuando la escena se cargue por primera vez y cada vez que se refresque la escena
     init() {
-        this.score = 0;
+        this.score = 0; // Inicializa el score en 0 siempre
     }
 
     // Contiene las precargas de los archivos necesarios para la escena actual
@@ -72,32 +72,32 @@ class Escena extends Phaser.Scene {
 
         // Score
         this.scoreText = this.add.text(10, 570, 'Puntos: 0', {
-            fontSize: '20px',
-            fill: '#ff0',
-            fontFamily: 'verdana, arial, sans-sarif'
+            fontSize: '20px', // tamaño de la fuente
+            fill: '#ff0', // color de la letra
+            fontFamily: 'verdana, arial, sans-sarif' // font-family de la letra
         });
 
         // Paleta
         this.paleta = this.physics.add.image(400, 500, 'paleta');
-        this.paleta.setBounce(1);
-        this.paleta.setCollideWorldBounds(true);
-        this.paleta.body.allowGravity = false;
+        this.paleta.setBounce(1); // hace que la paleta rebote
+        this.paleta.setCollideWorldBounds(true); // hace que colisione con los bordes
+        this.paleta.body.allowGravity = false; // le desactiva la gravedad a la paleta
         this.paleta.body.immovable = true; // hace a la paleta inamovible para otros elementos
 
         // Pelota
         this.pelota = this.physics.add.image(400, 485, 'pelota');
         this.pelota.setCollideWorldBounds(true); // hace que colisione con los bordes
         this.pelota.setBounce(1); // hace que la pelota rebote
-        this.pelota.setData('glue', true);
+        this.pelota.setData('glue', true); // le asigna un dato 'glue' que se usará para determinar si esta en la paleta
 
         // Teclado
-        this.cursors = this.input.keyboard.createCursorKeys();
+        this.cursors = this.input.keyboard.createCursorKeys(); // importa las teclas 
 
         // Ladrillos
-        this.ladrillos = this.levels.CreateLevelOne();
+        this.ladrillos = this.levels.CreateLevelOne(); // Crea una variable ladrillos y le asigna la creacion del lvl 1
 
         // Nivel
-        this.currentLevel = 1;
+        this.currentLevel = 0; // Asigna el valor 0 a la variable currentLevel
 
         // Colisiones
         this.physics.add.collider(this.pelota, this.paleta, this.platformImpact.bind(this), null);
@@ -131,7 +131,7 @@ class Escena extends Phaser.Scene {
         // Comprueba la posicion de la pelota
         if (this.pelota.y > 600) {
             console.log('Ball cayo al vacio');
-            this.showGameOver();
+            this.showGameOver(); // Muestra la escena de game over
         }
 
         if (this.cursors.space.isDown) {
@@ -141,15 +141,24 @@ class Escena extends Phaser.Scene {
             }
         }
 
+        // Usa el contador de ladrillos activos en pantalla
         if (this.ladrillos.countActive() === 0) {
             this.currentLevel++;
             switch (this.currentLevel) {
-                case 2:
+                case 3:
+                    this.showPreview();
+                    break;
+                case 0:
+                    this.ladrillos = this.levels.CreateLevelOne(); // crea el lvl 1
+                    this.physics.add.collider(this.pelota, this.ladrillos, this.ladrillosImpact, null, this);
+                    this.resetBallposition(); // reestablece la posicion de la ball
+                    break;
+                case 1:
                     this.ladrillos = this.levels.CreateLevelTwo(); // crea el lvl 2
                     this.physics.add.collider(this.pelota, this.ladrillos, this.ladrillosImpact, null, this);
                     this.resetBallposition(); // reestablece la posicion de la ball
                     break;
-                case 3:
+                case 2:
                     this.showCongratulations(); // escena de victoria
                     break;
                 default: // caso por defecto
@@ -161,10 +170,11 @@ class Escena extends Phaser.Scene {
 
     // Impacto de la pelota con los ladrillos
     ladrillosImpact(pelota, ladrillo) {
-        this.brickImpactSample.play();
-        ladrillo.disableBody(true, true);
-        this.score++;
-        this.scoreText.setText('Puntos: ' + this.score);
+        
+        this.brickImpactSample.play(); // reproduce el sonido de impacto con el ladrillo
+        ladrillo.disableBody(true, true); // ""destruye el ladrillo""
+        this.score++; // aumenta la puntuacion
+        this.scoreText.setText('Puntos: ' + this.score); // modifica el texto de la puntuacion
 
     }
 
@@ -187,7 +197,7 @@ class Escena extends Phaser.Scene {
 
         this.pelota.setData('glue', true);
         this.pelota.x = this.paleta.x;
-        this.pelota.y = 485;
+        this.pelota.y = 480;
         this.pelota.setVelocityY(0);
 
     }
@@ -202,6 +212,11 @@ class Escena extends Phaser.Scene {
     showCongratulations() {
         this.victorySample.play();
         this.scene.start('congratulations');
+    }
+
+    // Escena de previsualizacion
+    showPreview() {
+        this.scene.start('preview');
     }
 
 }

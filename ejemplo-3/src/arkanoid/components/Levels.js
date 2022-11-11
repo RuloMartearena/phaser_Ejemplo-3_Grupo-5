@@ -2,11 +2,14 @@ import Phaser from 'phaser';
 
 class Levels extends Phaser.Scene {
 
+    // Llaves para la creacion de ladrillos
     keys = ['ladrillo0', 'ladrillo1', 'ladrillo2', 'ladrillo3', 'ladrillo4', 'ladrillo5'];
 
     constructor(scene) {
-        super({ key: 'levels' });
+
+        super({ key: 'levels' }); // Asigna la clave 'levels' al script
         this.relatedScene = scene;
+
     }
 
     CreateLevelOne() {
