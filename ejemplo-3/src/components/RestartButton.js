@@ -1,12 +1,14 @@
 class RestartButton {
 
     constructor(scene) {
+
         this.relatedScene = scene;
     }
 
     preload() {
 
-        this.relatedScene.load.image('restart', 'img/restart.png');
+        this.relatedScene.load.image('restart', 'img/arkanoid/restart.png');
+
     }
 
     create() {
@@ -16,8 +18,9 @@ class RestartButton {
         this.startButton.on('pointerdown', () => {
             this.relatedScene.scene.start('game');
         });
+
     }
-    
+
 }
 
 export default RestartButton;

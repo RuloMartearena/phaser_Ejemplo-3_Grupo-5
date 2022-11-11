@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import Levels from '../components/Levels';
 
 class Escena extends Phaser.Scene {
 
@@ -7,6 +8,7 @@ class Escena extends Phaser.Scene {
         super({ key: 'game' });
     }
 
+    // Se establecen para que no tiren error por las dudas
     cursors = null;
     paleta = null;
     pelota = null;
@@ -16,6 +18,7 @@ class Escena extends Phaser.Scene {
     ladrillosTres = null;
     ladrillosCuatro = null;
     ladrillosCinco = null;
+    // brickImpactSample = null;
 
     // Esta funcion se va a ejecutar cuando la escena se cargue por primera vez y cada vez que se refresque la escena
     init() {
@@ -26,15 +29,18 @@ class Escena extends Phaser.Scene {
     preload() {
 
         // Carga una imagen. Los parametros son el nombre y la direccion
-        this.load.image('fondo', 'img/fondo.png');
-        this.load.image('pelota', 'img/ball.png');
-        this.load.image('ladrillo0', 'img/brick0.png');
-        this.load.image('ladrillo1', 'img/brick1.png');
-        this.load.image('ladrillo2', 'img/brick2.png');
-        this.load.image('ladrillo3', 'img/brick3.png');
-        this.load.image('ladrillo4', 'img/brick4.png');
-        this.load.image('ladrillo5', 'img/brick5.png');
-        this.load.image('paleta', 'img/paddle.png');
+        this.load.image('fondo', 'img/arkanoid/fondo.png');
+        this.load.image('pelota', 'img/arkanoid/ball.png');
+        this.load.image('ladrillo0', 'img/arkanoid/brick0.png');
+        this.load.image('ladrillo1', 'img/arkanoid/brick1.png');
+        this.load.image('ladrillo2', 'img/arkanoid/brick2.png');
+        this.load.image('ladrillo3', 'img/arkanoid/brick3.png');
+        this.load.image('ladrillo4', 'img/arkanoid/brick4.png');
+        this.load.image('ladrillo5', 'img/arkanoid/brick5.png');
+        this.load.image('paleta', 'img/arkanoid/paddle.png');
+
+        // Carga sonidos
+        // this.load.audio('brickImpact', 'sonidos/arkanoid/romper.mp3');
 
     }
 
@@ -87,6 +93,7 @@ class Escena extends Phaser.Scene {
         // Colisiones
         this.physics.add.collider(this.pelota, this.paleta, this.platformImpact.bind(this), null);
         this.physics.add.collider(this.pelota, this.ladrillos, this.ladrillosImpact, null, this);
+
     }
 
     // Se ejectura constantemente. El código escrito estará pendiente a las acciones
@@ -94,15 +101,15 @@ class Escena extends Phaser.Scene {
 
         // Mueve la paleta
         if (this.cursors.left.isDown) {
-            this.paleta.setVelocityX(-300);
+            this.paleta.setVelocityX(-500);
             if (this.pelota.getData('glue')) {
-                this.pelota.setVelocityX(-300);
+                this.pelota.setVelocityX(-500);
             }
         }
         else if (this.cursors.right.isDown) {
-            this.paleta.setVelocityX(300);
+            this.paleta.setVelocityX(500);
             if (this.pelota.getData('glue')) {
-                this.pelota.setVelocityX(300);
+                this.pelota.setVelocityX(500);
             }
         }
         else {
@@ -118,30 +125,48 @@ class Escena extends Phaser.Scene {
             this.showGameOver();
         }
 
-        if (this.cursors.up.isDown) {
-            this.pelota.setVelocity(300, 450);
-            this.pelota.setData('glue', false);
+        if (this.cursors.space.isDown) {
+            if (this.pelota.getData('glue')) {
+                this.pelota.setVelocity(-200, -200);
+                this.pelota.setData('glue', false);
+            }
         }
+
     }
 
     // Impacto del jugador con la pelota y más
     platformImpact(pelota, paleta) {
+
         let relativeImpact = pelota.x - paleta.x;
+
         if (relativeImpact < 0.1 && relativeImpact > -0.1) {
             pelota.setVelocityX(Phaser.Math.Between(-10, 10))
         } else {
             pelota.setVelocityX(10 * relativeImpact);
         }
+
     }
 
     // Impacto de la pelota con los ladrillos
     ladrillosImpact(pelota, ladrillo) {
+
         ladrillo.disableBody(true, true);
         this.score++;
         this.scoreText.setText('Puntos: ' + this.score);
         if (this.ladrillos.countActive() === 0) {
             this.showCongratulations();
         }
+
+    }
+
+    // Resetea la posicion de la pelota
+    resetBallposition() {
+
+        this.pelota.setData('glue', true);
+        this.pelota.x = 400;
+        this.pelota.y = 485;
+        this.pelota.setVelocityY(0);
+
     }
 
     // Escena de Game Over

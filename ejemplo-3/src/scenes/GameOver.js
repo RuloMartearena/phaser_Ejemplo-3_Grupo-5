@@ -5,14 +5,16 @@ class GameOver extends Phaser.Scene {
 
     // Se usará como palabra clave para usar la escena
     constructor() {
+
         super({ key: 'gameover' });
         this.restartButton = new RestartButton(this);
+
     }
 
     preload() {
 
         // Carga una imagen. Los parametros son el nombre y la direccion
-        this.load.image('gameOver', 'img/gameOver2.png');
+        this.load.image('gameOver', 'img/arkanoid/gameOver2.png');
         this.restartButton.preload();
 
     }

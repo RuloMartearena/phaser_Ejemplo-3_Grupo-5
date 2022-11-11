@@ -5,14 +5,16 @@ class Congratulations extends Phaser.Scene {
 
     // Se usará como palabra clave para usar la escena
     constructor() {
+
         super({ key: 'congratulations' });
         this.restartButton = new RestartButton(this);
+
     }
 
     preload() {
 
         // Carga una imagen. Los parametros son el nombre y la direccion
-        this.load.image('win', 'img/win.png');
+        this.load.image('win', 'img/arkanoid/win.png');
         this.restartButton.preload();
 
     }
